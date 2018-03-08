@@ -6,67 +6,27 @@
 #include <sys/wait.h>
 #include  <signal.h>
 #include <sys/types.h>
-#define LINE_LENGTH 100 #define HISTORY_LENGTH 100
+#define LINE_LENGTH 100 
+#define HISTORY_LENGTH 100
 #define RHISTORY_LENGTH 10 //recent history for the "history" cmd
 
 const int ARGV_LENGTH = LINE_LENGTH/2+1;
 int run;
 
 //parse the line, sort arguments into argv
-void parseLine (char *line, char *argv[], int *cntp){
-   	char *s = line, *e = line; int i = 0;
-	while (i < ARGV_LENGTH-1){ //for safety
-
-		while (*e != '\0' && !isspace(*e)) e++;
-		size_t leng = e-s;
-		if (leng > 0){
-			argv[i] = malloc(leng+1); //leng and '\0'
-			if (argv[i] == (char *)0){
-				printf ("Out of memory - Terminating...\n");
-				exit(-1);
-			}
-			strncpy(argv[i], s, leng);
-			strncpy(argv[i]+leng, "\0", 1);
-			i++;
-		}
-
-		if (*e == '\0')
-			break;
-		else
-			s = e = e+1;
-	}
-	argv[i] = (char *)0;	 //null pointer
-	*cntp = i;
-}
+void parseLine (char *line, char *argv[], int *cntp);
 
 //frees the memory used to split and store the parameters
-void clearArgv(char *argv []){
-	char **p = argv, **q = argv;
-	for (int i = 0; i < ARGV_LENGTH-1 && argv[i] != (char *)0; i++){
-		//printf("%d\n", argv[i]);
-		free(argv[i]);
-	}
-}
+void clearArgv(char *argv []);
 
 //kills all children who did not yet terminate 
-void killChildren (){
-	printf("Interrupting all children :(\n");
-	kill(0, SIGINT);
-}
+void killChildren ();
 
-void interruptHandler(int sig){
-	run = 0;
-	printf("\nExiting bashic:(\nPress any key to exit...\n");
-}
-int max(int a, int b){
-	return a>b? a : b;
-}
+void interruptHandler(int sig);
 
-void historize(int *hi, int *hcnt, char *src, char history[][LINE_LENGTH+5]){
-	strncpy(history[*hi], src, strlen(src)+1);
-	*hi = (*hi+1)%HISTORY_LENGTH;
-	(*hcnt)++;
-}
+int max(int a, int b);
+
+void historize(int *hi, int *hcnt, char *src, char history[][LINE_LENGTH+5]);
 
 int main (){ //args later
 	signal(SIGINT, interruptHandler);
@@ -139,6 +99,7 @@ int main (){ //args later
 			clearArgv(args);
 			parseLine(history[hprev], args, &cnt);
 		} 
+
 		//commands stored in history
 		char *src = cmdline;
 		if (hprev != -1){
@@ -181,4 +142,59 @@ int main (){ //args later
 
 	killChildren();
 	return 0;
+}
+
+void parseLine (char *line, char *argv[], int *cntp){
+   	char *s = line, *e = line; int i = 0;
+	while (i < ARGV_LENGTH-1){ //for safety
+
+		while (*e != '\0' && !isspace(*e)) e++;
+		size_t leng = e-s;
+		if (leng > 0){
+			argv[i] = malloc(leng+1); //leng and '\0'
+			if (argv[i] == (char *)0){
+				printf ("Out of memory - Terminating...\n");
+				exit(-1);
+			}
+			strncpy(argv[i], s, leng);
+			strncpy(argv[i]+leng, "\0", 1);
+			i++;
+		}
+
+		if (*e == '\0')
+			break;
+		else
+			s = e = e+1;
+	}
+	argv[i] = (char *)0;	 //null pointer
+	*cntp = i;
+}
+
+//frees the memory used to split and store the parameters
+void clearArgv(char *argv []){
+	char **p = argv, **q = argv;
+	for (int i = 0; i < ARGV_LENGTH-1 && argv[i] != (char *)0; i++){
+		//printf("%d\n", argv[i]);
+		free(argv[i]);
+	}
+}
+
+//kills all children who did not yet terminate 
+void killChildren (){
+	printf("Interrupting all children :(\n");
+	kill(0, SIGINT);
+}
+
+void interruptHandler(int sig){
+	run = 0;
+	printf("\nExiting bashic:(\nPress any key to exit...\n");
+}
+int max(int a, int b){
+	return a>b? a : b;
+}
+
+void historize(int *hi, int *hcnt, char *src, char history[][LINE_LENGTH+5]){
+	strncpy(history[*hi], src, strlen(src)+1);
+	*hi = (*hi+1)%HISTORY_LENGTH;
+	(*hcnt)++;
 }
