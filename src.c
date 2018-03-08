@@ -1,33 +1,58 @@
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
 #define LINE_LENGTH 100
 
-int main (){ //args later
-	int run = 1;
-	int status;
+const int ARGV_LENGTH = LINE_LENGTH/2+1;
+//parse the line, sort arguments into argv
+void parseLine (char *line, char *argv[ARGV_LENGTH]){
+	char *s = line, *e = line;
+	unsigned int i = 0;
+	while (i < ARGV_LENGTH){ //for safety
 
-	while (run){
+		while (*e != '\0' && !isspace(e)) e++;
+		size_t leng = e-s;
+		if (leng > 1){
+			argv[i] = malloc(leng+1); //leng and '\0'
+			strncpy(argv[i], s, leng);
+			strncpy(argv[i]+leng-1, "\0", 1);
+			i++;
+		}
+
+		if (*e == NULL)
+			break;
+		else
+			s = e = e+1;
+	}
+}
+
+int main (){ //args later
+	char *args[ARGV_LENGTH];
+	int run = 1;
+
+	while (run) {
 		printf("bashic $ > ");
 		
 		char cmdline[LINE_LENGTH];
-		gets(cmd);
+		gets(cmdline);
 		// ls -la as as as a
 
 		char *cmd[] = { "ls", "-l", (char *)0 };
 
 		pid_t pid = fork();
-		if (pid == 0){ //child
+		if (pid > 0){ //parent
+			//wait(&status);
+			printf("exec done\n");
+		} else if (pid == 0){ //child
 			printf("child here\b");
 			execvp(cmd[0], cmd);
+		} else { //fork failed
+			printf ("Fork failed\n");
+			break;
 		}
-		else{
-			wait(&status);
-			printf("exec done\n");
-		}
-
-
 	}
 
 
