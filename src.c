@@ -81,7 +81,8 @@ int main (){ //args later
 			int n = strlen(args[0]);
 			char *numc = malloc(n);
 			strncpy(numc, args[0]+1, n); //to include '\0'
-			for (int i = 0; i < n-1; i++)
+			int i;
+			for (i = 0; i < n-1; i++)
 				if (!isdigit(numc[i])){
 					printf("Error executing a history command (invalid symbol)\n");
 					all_dig = 1;
@@ -173,7 +174,8 @@ void parseLine (char *line, char *argv[], int *cntp){
 //frees the memory used to split and store the parameters
 void clearArgv(char *argv []){
 	char **p = argv, **q = argv;
-	for (int i = 0; i < ARGV_LENGTH-1 && argv[i] != (char *)0; i++){
+	int i;
+	for (i = 0; i < ARGV_LENGTH-1 && argv[i] != (char *)0; i++){
 		//printf("%d\n", argv[i]);
 		free(argv[i]);
 	}
