@@ -6,18 +6,15 @@
 #include <sys/wait.h>
 #include  <signal.h>
 #include <sys/types.h>
-
-#define LINE_LENGTH 100
-#define HISTORY_LENGTH 100
+#define LINE_LENGTH 100 #define HISTORY_LENGTH 100
 #define RHISTORY_LENGTH 10 //recent history for the "history" cmd
 
 const int ARGV_LENGTH = LINE_LENGTH/2+1;
 int run;
 
 //parse the line, sort arguments into argv
-void parseLine (char *line, char *argv[ARGV_LENGTH], int *cntp){
-	char *s = line, *e = line;
-	int i = 0;
+void parseLine (char *line, char *argv[], int *cntp){
+   	char *s = line, *e = line; int i = 0;
 	while (i < ARGV_LENGTH-1){ //for safety
 
 		while (*e != '\0' && !isspace(*e)) e++;
@@ -43,7 +40,7 @@ void parseLine (char *line, char *argv[ARGV_LENGTH], int *cntp){
 }
 
 //frees the memory used to split and store the parameters
-void clearArgv(char *argv [ARGV_LENGTH]){
+void clearArgv(char *argv []){
 	char **p = argv, **q = argv;
 	for (int i = 0; i < ARGV_LENGTH-1 && argv[i] != (char *)0; i++){
 		//printf("%d\n", argv[i]);
@@ -59,11 +56,18 @@ void killChildren (){
 
 void interruptHandler(int sig){
 	run = 0;
-	printf("Exiting bashic:(\nPress anything to exit...\n");
+	printf("\nExiting bashic:(\nPress any key to exit...\n");
 }
 int max(int a, int b){
 	return a>b? a : b;
 }
+
+void historize(int *hi, int *hcnt, char *src, char history[][LINE_LENGTH+5]){
+	strncpy(history[*hi], src, strlen(src)+1);
+	*hi = (*hi+1)%HISTORY_LENGTH;
+	(*hcnt)++;
+}
+
 int main (){ //args later
 	signal(SIGINT, interruptHandler);
 	char *args[ARGV_LENGTH];
@@ -90,10 +94,10 @@ int main (){ //args later
 
 		if (cnt < 1)
 			continue;
-		
+
+		//commands not stored in history
 		if (!strcmp(args[0], "exit")){
 			run = 0;
-			printf ("Exiting shell..\n");
 			continue;
 		} else if (!strcmp(args[0], "history")){
 			int i = hi-1, c = hcnt, j;
@@ -134,30 +138,27 @@ int main (){ //args later
 			free(numc);
 			clearArgv(args);
 			parseLine(history[hprev], args, &cnt);
-		} else if (!strcmp(args[0], "cd")){
+		} 
+		//commands stored in history
+		char *src = cmdline;
+		if (hprev != -1){
+			src = history[hprev];
+			printf("> %s", history[hprev]);
+		}
+		historize(&hi, &hcnt, src, history);
+
+		if (!strcmp(args[0], "cd")){
 			if (chdir(args[1]))
 				printf("Error: Invalid path for cd\n");
 			continue;
 		}
-
-		if (hprev != -1){
-			printf("> %s", history[hprev]);
-		}
-		char *src = (hprev == -1? cmdline : history[hprev]);
-		//store in history
-		strncpy(history[hi], src, strlen(src)+1);
-		hi = (hi+1)%HISTORY_LENGTH;
-		hcnt++;
-
+		
 		if (!strcmp(args[cnt-1], "&")){
 			free(args[cnt-1]);
 			args[cnt-1] = (char*)0;
-			printf("will run %s in  background\n", args[0]);
 			background = 1;
 			cnt--;
 		}
-
-		//printf("# of args = %d\n", cnt);
 
 		pid = fork();
 		if (pid > 0){ //parent
