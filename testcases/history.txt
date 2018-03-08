@@ -1,0 +1,20 @@
+ls -la
+netstat
+history
+cal
+date
+whoami
+man cat
+history
+!7
+!7
+history
+!8
+!!
+history
+!0
+!50
+!13
+!7
+exit
+

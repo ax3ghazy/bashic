@@ -1,0 +1,7 @@
+ping google.com -c 5 &
+## WHILE IT IS EXECUTING ##
+ps &
+ls -la
+cal
+ps
+

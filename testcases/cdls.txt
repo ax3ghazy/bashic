@@ -1,0 +1,15 @@
+cd ..
+cd ./bashic
+less src.c
+ls
+ls -la
+ls &
+history
+!2
+history
+touch testfile.test
+ls
+rm testfile.test
+ls
+exit
+
