@@ -11,22 +11,24 @@ const int ARGV_LENGTH = LINE_LENGTH/2+1;
 void parseLine (char *line, char *argv[ARGV_LENGTH]){
 	char *s = line, *e = line;
 	unsigned int i = 0;
-	while (i < ARGV_LENGTH){ //for safety
+	while (i < ARGV_LENGTH-1){ //for safety
 
-		while (*e != '\0' && !isspace(e)) e++;
+		while (*e != '\0' && !isspace(*e)) e++;
+		printf("ei = %d\n", e-line);
 		size_t leng = e-s;
-		if (leng > 1){
+		if (leng > 0){
 			argv[i] = malloc(leng+1); //leng and '\0'
 			strncpy(argv[i], s, leng);
-			strncpy(argv[i]+leng-1, "\0", 1);
+			strncpy(argv[i]+leng, "\0", 1);
 			i++;
 		}
 
-		if (*e == NULL)
+		if (*e == '\0')
 			break;
 		else
 			s = e = e+1;
 	}
+	argv[i] = (char *)0;	 //null pointer
 }
 
 int main (){ //args later
