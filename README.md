@@ -7,6 +7,7 @@
 gcc src.c -o bashic
 ./bashic
 ```
+use `exit` to terminate the shell
 
 ## Specs
 
