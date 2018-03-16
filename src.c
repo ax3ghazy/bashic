@@ -7,6 +7,16 @@
 #include  <signal.h>
 #include <sys/types.h>
 
+//Colors:
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+
 #define LINE_LENGTH 100
 #define HISTORY_LENGTH 100
 #define RHISTORY_LENGTH 10 //recent history for the "history" cmd
@@ -15,38 +25,39 @@
 
 int run;
 
-char *args[ARGV_LENGTH];
-int argcnt;
-
-char history[HISTORY_LENGTH][LINE_LENGTH+5];
 int hi, hcnt;
+char history[HISTORY_LENGTH][LINE_LENGTH+5];
+
 pid_t pid;
 
 void displayPrompt();
 
 //parse the line, sort arguments into argv
 void parseLine (char *line, char *argv[], int *argcntp);
-
 //frees the memory used to split and store the parameters
 void clearArgv(char *argv []);
 
+//return the status of the fork, reports execution errors
 int forkExec(char *args[], int *argcnt);
 
 //kills all children who did not yet terminate
 void interruptChildren ();
-
 void interruptHandler(int sig);
 
-int max(int a, int b);
-int min(int a, int b);
-
-void historize(int *hi, int *hcnt, char *src, char history[][LINE_LENGTH+5]);
+//store cmd in history
+void historize(char *src, char history[][LINE_LENGTH+5]);
 void printHistory();
 int historyNum(char *cmd);
 
+//utilities
+int max(int a, int b);
+int min(int a, int b);
 
 int main (){ //args later
 	signal(SIGINT, interruptHandler);
+
+	char *args[ARGV_LENGTH];
+	int argcnt;
 
 	char cmdline[LINE_LENGTH+5];
 
@@ -96,7 +107,7 @@ int main (){ //args later
 		}
 		//commands stored in history:
 		else {
-			historize(&hi, &hcnt, src, history);
+			historize(src, history);
 
 			if (strcmp(args[0], "cd") == 0){
 				if (chdir(args[1]))
@@ -118,7 +129,8 @@ void displayPrompt(){
 	char cwd[LINE_LENGTH];
 	getcwd(cwd, LINE_LENGTH);
 
-	printf("bashic $ (%s)> ", cwd);
+	printf("|" KBLU "bashic " KCYN "$ " KNRM"[" KYEL "%s" KNRM "]\n", cwd);
+	printf(KNRM "|=> ", KNRM); 
 	fflush(stdout);
 }
 
@@ -209,10 +221,10 @@ int min(int a, int b){
 	return a<b? a : b;
 }
 
-void historize(int *hi, int *hcnt, char *src, char history[][LINE_LENGTH+5]){
-	strncpy(history[*hi], src, strlen(src)+1);
-	*hi = (*hi+1)%HISTORY_LENGTH;
-	(*hcnt)++;
+void historize(char *src, char history[][LINE_LENGTH+5]){
+	strncpy(history[hi], src, strlen(src)+1);
+	hi = (hi+1)%HISTORY_LENGTH;
+	hcnt++;
 }
 
 void printHistory(){
