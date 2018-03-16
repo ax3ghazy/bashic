@@ -19,4 +19,7 @@ use `exit` to terminate the shell
 
 ![alt text](/bashic.png "Prompt")
 
+## Later
 
+- scripting?
+- multithreading?
