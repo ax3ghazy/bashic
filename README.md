@@ -1,21 +1,24 @@
 # BAsic SHell In C (BASHIC)
 
-
-## Running
+## Usage
 
 ```
 gcc src.c -o bashic
 ./bashic
 ```
-use `exit` to terminate the shell
+- `history` to display command history
+- `!N` to execute the Nth command in history
+- `!!` to execute the last command
+- `exit` to terminate the shell
 
 ## Specs
 
 - `cd`
 - Colorized prompt
 - Children are sent SIGINT (not SIGKILL) when the shell terminates
+- Command history
 
-## Scrot
+## Scrots
 
 ![alt text](/bashic.png "Prompt")
 
