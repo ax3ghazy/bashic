@@ -15,6 +15,9 @@
 
 int run;
 
+char *args[ARGV_LENGTH];
+int argcnt;
+
 char history[HISTORY_LENGTH][LINE_LENGTH+5];
 int hi, hcnt;
 pid_t pid;
@@ -45,19 +48,18 @@ int historyNum(char *cmd);
 int main (){ //args later
 	signal(SIGINT, interruptHandler);
 
-	char *args[ARGV_LENGTH];
-	int argcnt;
 	char cmdline[LINE_LENGTH+5];
 
 	int execHistory, hprev;
 
 	run = 1;
-	hi = hcnt = 0;
 	execHistory = 0;
+	hi = hcnt = 0;
 	do {
 
 		displayPrompt();
 
+		argcnt = 0;
 		char *src;
 		if (!execHistory){
 			fgets(cmdline, LINE_LENGTH, stdin);
@@ -117,6 +119,7 @@ void displayPrompt(){
 	getcwd(cwd, LINE_LENGTH);
 
 	printf("bashic $ (%s)> ", cwd);
+	fflush(stdout);
 }
 
 void parseLine (char *line, char *argv[], int *argcntp){
@@ -189,16 +192,13 @@ int forkExec(char *args[], int *argcntp){
 //kills all children who did not yet terminate
 void interruptChildren (){
 	printf("Interrupting all children...\n");
-	kill(0, SIGINT);
+	signal(SIGINT, SIG_IGN);
+	kill(-pid, SIGINT);
+	signal(SIGINT, interruptHandler);
 }
 
 void interruptHandler(int sig){
-	if (pid == 0) //child
-		printf("\nChild interrupted\n");
-	else {
-		//run = 0;
-		printf("\n:(\n");
-	}
+	printf ("\nBashic interrupted!\nUse \"exit\" if you want to quit..\n");
 }
 
 int max(int a, int b){
